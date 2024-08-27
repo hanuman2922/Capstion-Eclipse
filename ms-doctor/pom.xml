@@ -27,7 +27,7 @@
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<version>8.0.22</version>
+			<version>8.0.30</version>
 		</dependency>
 		       
 		<dependency>
@@ -50,20 +50,15 @@
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
 			<version>2.2.0</version>
 		</dependency>
+		  
 		
-		
-		
-		<!-- this for exception of    jakarta.ws.rs.ext.RuntimeDelegate-->
 		<dependency>
-    		<groupId>jakarta.ws.rs</groupId>
-    		<artifactId>jakarta.ws.rs-api</artifactId>
-    		<version>2.1.6</version>
-		</dependency>
-		
-		
-		
-		
-		
+    <groupId>jakarta.ws.rs</groupId>
+    <artifactId>jakarta.ws.rs-api</artifactId>
+    <!-- Or the appropriate version -->
+</dependency>
+  
+	
 		
 	</dependencies>
 	<dependencyManagement>
