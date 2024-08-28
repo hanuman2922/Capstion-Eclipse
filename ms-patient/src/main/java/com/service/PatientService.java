@@ -32,7 +32,7 @@ public class PatientService {
 		RestTemplate restTemplate;
 		
 		String baseUrl = "http://doctormicroservice/doctors";
-    
+ /*   
 	// Register
 		public Patient addNewPatient(Patient patient) {
 			Patient patient1 = patientRepository.save(patient);
@@ -51,6 +51,33 @@ public class PatientService {
 		    return null;  
 		}
 
+	*/	
+		
+		
+		
+
+	
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
 		
 
 		//6
