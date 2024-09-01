@@ -111,7 +111,15 @@ public class GlobalExceptionHandler {
 	        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
 	    }
 	 
-	 
+//	    @ExceptionHandler(value = CustomException.class)
+//	    @ResponseStatus(HttpStatus.BAD_REQUEST)
+//	    public ResponseEntity<ErrorResponse> handleCustomException1(CustomException ex) {
+//	        List<String> details = new ArrayList<>();
+//	        details.add("cause: " + ex.getMessage());
+//	        ErrorResponse error = new ErrorResponse("Error Occurred", details);
+//	        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+//	    }
 
+	   
 	 
 }

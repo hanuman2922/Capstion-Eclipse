@@ -23,11 +23,14 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.dto.AppointmentDTO;
 import com.dto.PatientDTO;
+import com.exceptions.CustomException;
 import com.model.Patient;
 import com.service.AppointmentService;
 import com.service.PatientService;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
 
 @RestController
 @RequestMapping("/patients")
@@ -44,240 +47,154 @@ public class PatientContoller {
 	RestTemplate restTemplate;
 
 	String baseUrl = "http://doctormicroservice/doctors";
-/*
-	// Register
-	@PostMapping
-	public ResponseEntity<?> Register(@Valid @RequestBody Patient patient) {
-		Patient register = patientService.addNewPatient(patient);
-		return new ResponseEntity<>(register, HttpStatus.OK);
-	}
 
-	// login
-	@PostMapping("/login")
-	public ResponseEntity<?> loginCustomer(@Valid @RequestBody PatientDTO patientlogin) {
-		Patient patient1 = patientlogin.toEnity();
-		String customer = patientService.verify(patient1); // changed Learner to string
-		if (customer != null) {
-			return ResponseEntity.ok(customer);
-		} else {
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Required Both email and password");
-		}
-	}
-
-	// 3 doctors by id working
-
-	@GetMapping("/doctors/{doc_id}")
-	public ResponseEntity<?> getDoctorById(@Valid @PathVariable("doc_id") int Id) {
-		String url = "http://doctormicroservice/doctors/" + Id; // assuming the doctor microservice has a /doctors
-																// endpoint
-
-		ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
-
-		if (response.getStatusCode().isSameCodeAs(HttpStatus.OK)) {
-			return ResponseEntity.ok(response.getBody());
-		} else if (response.getStatusCode().isSameCodeAs(HttpStatus.NO_CONTENT)) {
-			return new ResponseEntity<String>("No Doctor found with that id ", HttpStatus.NOT_FOUND);
-		}
-		//return  ResponseEntity.status(response.getStatusCode()).body(response.getBody());
-		return new ResponseEntity<>(response.getBody(),response.getStatusCode());
-	}
-
-	// new specilization
-	private String buildUrl(String baseUrl, String param, String value) {
-		String url = UriComponentsBuilder.fromHttpUrl(baseUrl).queryParam(param, value).toUriString();
-		return url;
-	}
-	//4
-	@GetMapping("/doctors")
-	public ResponseEntity<?> showDoctorsBySpecialization(@RequestParam("specialization") String specialization) {
-		String url = buildUrl(baseUrl, "specialization", specialization);
-		System.out.println(url);
-		ResponseEntity<List> response = restTemplate.exchange(url, HttpMethod.GET, null,
-				new ParameterizedTypeReference<List>() {
-				});
-		if (response.getStatusCode().isSameCodeAs(HttpStatus.OK)) {
-			return new ResponseEntity<List>(response.getBody(), HttpStatus.OK);
-		} else if (response.getStatusCode().isSameCodeAs(HttpStatus.NO_CONTENT)) {
-			return new ResponseEntity<String>("No doctor record found specialization", HttpStatus.NOT_FOUND);
-		}
-		return null;
-
-	}
-
-
-
-					
-	//5				
-					
-	 @PostMapping("/appointments")
-	    public ResponseEntity<String> bookAppointment(@Valid @RequestBody AppointmentDTO appointmentDTO) {
-	        try {
-	            // Call the service to book the appointment
-	            appointmentService.bookAppointment(appointmentDTO);
-	            return new ResponseEntity<>("Appointment booked successfully", HttpStatus.CREATED);
-	        } catch (Exception e) {
-	            // Handle exceptions and errors
-	            return new ResponseEntity<>("Error booking appointment: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-	        }
-	    }
-	*/
 	
 	
 	 private static final Logger logger = LoggerFactory.getLogger(PatientContoller.class);
-/*
-	 // 1.Register
-	    @PostMapping("/register")
-	    public ResponseEntity<?> Register(@Valid @RequestBody Patient patient) {
-	        logger.info("Registering new patient: {}", patient);
-	        Patient register = patientService.addNewPatient(patient);
-	        logger.info("Patient registered successfully: {}", register);
-	        return new ResponseEntity<>(register, HttpStatus.OK);
-	    }
-	    
-	    
-	 //2. Login
-	    @PostMapping("/login")
-	    public ResponseEntity<?> loginCustomer(@Valid @RequestBody PatientDTO patientlogin) {
-	        logger.info("Customer login attempt with: {}", patientlogin);
-	        Patient patient1 = patientlogin.toEnity();
-	        String customer = patientService.verify(patient1); // changed Learner to string
-	        if (customer != null) {
-	            logger.info("Customer verified successfully");
-	            return ResponseEntity.ok(customer);
-	        } else {
-	            logger.warn("Login failed: Required both email and password");
-	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Required Both email and password");
-	        }
-	    }
-	    
-	    
-	    // 3.Get Doctor by ID
-	    @GetMapping("/doctors/{doc_id}")
-	    public ResponseEntity<?> getDoctorById(@Valid @PathVariable("doc_id") int Id) {
-	        logger.info("Fetching doctor with ID: {}", Id);
-	        String url = baseUrl + "/doctors/" + Id; // assuming the doctor microservice has a /doctors endpoint
-	        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
 
-	        if (response.getStatusCode().is2xxSuccessful()) {
-	            logger.info("Doctor found: {}", response.getBody());
-	            return ResponseEntity.ok(response.getBody());
-	        } else if (response.getStatusCode().is4xxClientError()) {
-	            logger.warn("No Doctor found with ID: {}", Id);
-	            return new ResponseEntity<>("No Doctor found with that id", HttpStatus.NOT_FOUND);
-	        }
-	        logger.error("Error occurred while fetching doctor with ID: {}", Id);
-	        return new ResponseEntity<>(response.getBody(), response.getStatusCode());
-	    }
-	
-		// new specilization
-		private String buildUrl(String baseUrl, String param, String value) {
-			String url = UriComponentsBuilder.fromHttpUrl(baseUrl).queryParam(param, value).toUriString();
-			return url;
-		}
-	
-	    //4. Show Doctors by Specialization
-	    @GetMapping("/doctors")
-	    public ResponseEntity<?> showDoctorsBySpecialization(@RequestParam("specialization") String specialization) {
-	        logger.info("Fetching doctors with specialization: {}", specialization);
-	        String url = buildUrl(baseUrl, "specialization", specialization);
-	        logger.debug("Constructed URL: {}", url);
-	        ResponseEntity<List> response = restTemplate.exchange(url, HttpMethod.GET, null,
-	                new ParameterizedTypeReference<List>() {
-	                });
-	        if (response.getStatusCode().is2xxSuccessful()) {
-	            logger.info("Doctors found: {}", response.getBody());
-	            return new ResponseEntity<>(response.getBody(), HttpStatus.OK);
-	        } else if (response.getStatusCode().is4xxClientError()) {
-	            logger.warn("No doctor record found for specialization: {}", specialization);
-	            return new ResponseEntity<>("No doctor record found for specialization", HttpStatus.NOT_FOUND);
-	        }
-	        logger.error("Error occurred while fetching doctors by specialization: {}", specialization);
-	        return new ResponseEntity<>(response.getBody(), response.getStatusCode());
-	    }
-	
-	
-	    // 5.Book Appointment
-	    @PostMapping("/appointments")
-	    public ResponseEntity<String> bookAppointment(@Valid @RequestBody AppointmentDTO appointmentDTO) {
-	        logger.info("Booking appointment: {}", appointmentDTO);
-	        try {
-	            appointmentService.bookAppointment(appointmentDTO);
-	            logger.info("Appointment booked successfully");
-	            return new ResponseEntity<>("Appointment booked successfully", HttpStatus.CREATED);
-	        } catch (Exception e) {
-	            logger.error("Error booking appointment: {}", e.getMessage(), e);
-	            return new ResponseEntity<>("Error booking appointment: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-	        }
-	    }
-	
-*/
-	 
-	 
 
-	
-
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	 
-	 //6
-//	 @GetMapping("/patient/appointments")
-//     public ResponseEntity<List<AppointmentDTO>> getAppointments() {
-//         List<AppointmentDTO> appointments = patientService.getAppointmentsForCurrentMonth();
-//         return ResponseEntity.ok(appointments);  
-//     }
-	 
-	 
-	 //6  type 2
-//	 @GetMapping("/patient/appointments")
-//	 public ResponseEntity<List<AppointmentDTO>> getAppointments() {
-//	     try {
-//	         List<AppointmentDTO> appointments = patientService.getAppointmentsForCurrentMonth();
-//	         return ResponseEntity.ok(appointments);
-//	     } catch (Exception e) {
-//	         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-//	     }
-//	 }
-//	 
-	 
-	 
-	 //6 type3
-	 @GetMapping("/patient/appointments")
-	 public ResponseEntity<List<AppointmentDTO>> getAppointments() {
+	// 1. Register
+	 @PostMapping
+	 public ResponseEntity<?> Register(@Valid @RequestBody Patient patient) {
+	     logger.info("Registering new patient: {}", patient);
 	     try {
-	         List<AppointmentDTO> appointments = patientService.getAppointmentsForCurrentMonth();
-	         return ResponseEntity.ok(appointments);
+	         Patient register = patientService.addNewPatient(patient);
+	         logger.info("Patient registered successfully: {}", register);
+	         return new ResponseEntity<>(register, HttpStatus.OK);
+	     } catch (CustomException e) {
+	         logger.error("Registration failed: {}", e.getMessage(), e);
+	         // Return a conflict status for specific validation errors
+	         return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
 	     } catch (Exception e) {
-	         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+	         logger.error("Error registering patient: {}", e.getMessage(), e);
+	         // Return a generic error status for other exceptions
+	         return new ResponseEntity<>("Error registering patient: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 	     }
 	 }
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-			
+
+	// 2. Login
+	@PostMapping("/login")
+	public ResponseEntity<?> loginCustomer(@Valid @RequestBody PatientDTO patientlogin) throws CustomException {
+	    logger.info("Customer login attempt with: {}", patientlogin);
+	    Patient patient1 = patientlogin.toEnity();
+	    String customer = patientService.verify(patient1);
+	    if (customer != null) {
+	        logger.info("Customer verified successfully");
+	        return ResponseEntity.ok(customer);
+	    } else {
+	        logger.warn("Login failed: Required both email and password");
+	        throw new CustomException("Required Both email and password");
+	    }
+	}
+
+	// 3. Get Doctor by ID
+	@GetMapping("/doctors/{doctorId}")
+    public ResponseEntity<?> getByDoctorId(@PathVariable @NotBlank @Positive String doctorId) throws CustomException {
+        if (doctorId == null || doctorId.trim().isEmpty()) {
+            throw new CustomException("Doctor ID must be provided");
+        }
+        String url = baseUrl + "/" + doctorId;
+        logger.info("Requesting URL: {}", url);
+        try {
+            ResponseEntity<List> response = restTemplate.getForEntity(url, List.class);
+         
+            if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+                logger.info("Doctor record found: {}", response.getBody());
+                return response;
+            } else {
+                logger.warn("No doctor record found for ID: {}", doctorId);
+                throw new CustomException("No doctor record found for ID: " + doctorId);
+            }
+        } catch (Exception ex) 
+        {      
+          logger.error("Exception occurred while fetching doctor with ID {}: {}", doctorId);
+          throw new CustomException("No Doctor found with that ID: " + doctorId);
+      }
+	}
+
+
+	
+	
+			private String buildUrl(String baseUrl, String param, String value) {
+				String url = UriComponentsBuilder.fromHttpUrl(baseUrl).queryParam(param, value).toUriString();
+				return url;
+			}
+	
+
+	// 4. Show Doctors by Specialization
+		    @GetMapping("/doctors")
+		    public ResponseEntity<?> showDoctorsBySpecialization(@RequestParam("specialization") String specialization) throws CustomException {
+		        if (specialization == null || specialization.trim().isEmpty()) {
+		            throw new CustomException("Specialization must be provided");
+		        }
+		        String url = buildUrl(baseUrl, "specialization", specialization);
+		        logger.info("Requesting URL: {}", url);
+		        try {
+		            ResponseEntity<List> response = restTemplate.exchange(url, HttpMethod.GET, null,
+		                new ParameterizedTypeReference<List>() {}
+		            );		           
+		            if (response.getStatusCode().value() == HttpStatus.OK.value() && response.getBody() != null && !response.getBody().isEmpty()) {
+		                return new ResponseEntity<>(response.getBody(), HttpStatus.OK);
+		            } else {
+		                throw new CustomException("No doctor record found for specialization: " + specialization);
+		            }
+
+		        } catch (Exception ex) {
+		            logger.error("Exception occurred while fetching doctors for specialization {}: {}", specialization, ex.getMessage());
+		            throw new CustomException("no doctors found with that specialization: " + specialization);
+		        }
+		    }
+		      
+	// 5. Book Appointment
+		    
+		    @PostMapping("/appointments")
+		    public ResponseEntity<String> bookAppointment(@Valid @RequestBody AppointmentDTO appointmentDTO) {
+		        logger.info("Booking appointment: {}", appointmentDTO);
+		        try {
+		            appointmentService.bookAppointment(appointmentDTO);
+		            logger.info("Appointment booked successfully");
+		            return new ResponseEntity<>("Appointment booked successfully", HttpStatus.CREATED);
+		        } catch (CustomException e) {
+		            logger.error("Error booking appointment: {}", e.getMessage(), e);
+		            
+		            if (e.getMessage().contains("already booked")) {
+		                return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+		            } else {
+		                return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		            }
+		        } catch (Exception e) {
+		            logger.error("Unexpected error: {}", e.getMessage(), e);
+		            return new ResponseEntity<>("Unexpected error occurred while booking appointment", HttpStatus.INTERNAL_SERVER_ERROR);
+		        }
+		    }
+		    
+		    
+		    
+		    
+		  //6 type3 it works    
+		    @GetMapping("/patient/appointments")
+		    public ResponseEntity<List<AppointmentDTO>> getAppointments() {
+		        logger.info("Received request to get appointments");
+		        try {
+		            List<AppointmentDTO> appointments = patientService.getAppointmentsForCurrentMonth();
+		            logger.info("Successfully retrieved {} appointments", appointments.size());
+		            return ResponseEntity.ok(appointments);
+		        } catch (Exception e) {
+		            logger.error("Error occurred while retrieving appointments", e);
+		            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+		        }
+		    }
+		    
+	    
 
 }
+
+
+
+
+
+
+
+
+
 
